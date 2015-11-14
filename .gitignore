@@ -22,3 +22,7 @@ project/plugins/project/
 # Ensime
 .ensime
 .ensime_cache
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
