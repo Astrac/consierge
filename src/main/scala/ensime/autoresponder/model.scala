@@ -6,9 +6,11 @@ import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpMethods, HttpRequ
 import akka.stream.Materializer
 import akka.stream.scaladsl.{Flow, Sink, Source}
 import akka.util.ByteString
+import com.typesafe.scalalogging.StrictLogging
 import org.joda.time.DateTime
 import play.api.libs.json.{JsValue, Json}
 import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
 import scala.util.Try
 
 case class Configuration(owner: String, repo: String, message: String)
@@ -40,9 +42,8 @@ trait Environment {
   def config: Configuration
 }
 
-trait Flows extends CommentSubmission {
+trait Flows extends CommentSubmission with StrictLogging {
   def issueSource: Source[Issue, Unit]
-  def responseSink: Sink[CommentResponse, Unit]
 
   def makeRequest(i: Issue): HttpRequest = ???
   def handleResponse(r: (Try[HttpResponse], Issue)): Issue = ???
@@ -52,6 +53,10 @@ trait Flows extends CommentSubmission {
       .map(i => (makeRequest(i), i))
       .via(pool)
       .map(handleResponse)
+
+  def responseSink: Sink[CommentResponse, Future[Unit]] = Sink.foreach[CommentResponse](resp =>
+    logger.info(s"Submitted a new comment: $resp")
+  )
 
   def graph(implicit mat: Materializer, as: ActorSystem, ec: ExecutionContext) = issueSource
     .via(searchFlow)
