@@ -32,7 +32,7 @@ object CommentResponse {
   implicit val reads: Reads[CommentResponse] = (
     (JsPath \ "id").read[Int] and
       (JsPath \ "url").read[String] and
-      (JsPath \ "created_at").read[DateTime]
+      (JsPath \ "created_at").read[String].map(DateTime.parse)
   )(CommentResponse.apply _)
 }
 
