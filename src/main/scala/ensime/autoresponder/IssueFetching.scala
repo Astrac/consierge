@@ -29,28 +29,6 @@ import scala.concurrent.duration._
 trait IssueFetching {
   self: Environment with Transport =>
 
-  implicit val userReads: Reads[User] =
-    (__ \ "id").read[Int].map(User.apply)
-
-  implicit object issueStateReads extends Reads[IssueState] {
-    def reads(json: JsValue) = json match {
-      case JsString("open") => JsSuccess(IssueState.Open)
-      case JsString("closed") => JsSuccess(IssueState.Closed)
-      case other => JsError("bad.issue.state: " + other)
-    }
-  }
-
-  implicit val issueReads: Reads[Issue] = (
-    (__ \ "id").read[Int] ~
-    (__ \ "number").read[Int] ~
-    (__ \ "user").read[User] ~
-    (__ \ "title").read[String] ~
-    (__ \ "body").read[String] ~
-    (__ \ "state").read[IssueState] ~
-    (__ \ "created_at").read[String].map(DateTime.parse) ~
-    (__ \ "updated_at").read[String].map(DateTime.parse)
-  )(Issue.apply _)
-
   private lazy val issuesUrl =
     s"https://api.github.com/repos/${config.owner}/${config.repo}/issues"
 
