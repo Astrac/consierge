@@ -1,3 +1,5 @@
+scalariformSettings
+
 lazy val akkaV = "2.3.14"
 lazy val akkaStreamsV = "1.0"
 
