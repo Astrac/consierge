@@ -26,13 +26,46 @@ import scala.util.{ Try, Success, Failure }
 import scala.concurrent._
 import scala.concurrent.duration._
 
+case class Credentials(
+  username: String,
+  accessToken: String)
+
 case class Configuration(
   owner: String,
   repo: String,
   message: String,
-  accessToken: String,
+  credentials: Credentials,
   pollInterval: FiniteDuration,
   timeout: FiniteDuration)
+
+object Configuration {
+  def load: Configuration = {
+    val config = com.typesafe.config.ConfigFactory.load()
+
+    def string(key: String): String =
+      Option(config.getString(key))
+        .getOrElse(sys.error(s"Config key not found: $key"))
+
+    def duration(key: String): FiniteDuration =
+      Option(config.getDuration(key))
+        .map(_.getNano.nanoseconds)
+        .getOrElse(sys.error(s"Config key not found: $key"))
+
+    def file(key: String): String =
+      scala.io.Source.fromFile(string(key)).mkString
+
+    Configuration(
+      owner = string("autoresponder.owner"),
+      repo = string("autoresponder.repo"),
+      message = file("autoresponder.messageFile"),
+      credentials = Credentials(
+        username = string("autoresponder.credentials.username"),
+        accessToken = string("autoresponder.credentials.accessToken")),
+      pollInterval = duration("autoresponder.pollInterval"),
+      timeout = duration("autoresponder.timeout")
+    )
+  }
+}
 
 trait Environment {
   def config: Configuration

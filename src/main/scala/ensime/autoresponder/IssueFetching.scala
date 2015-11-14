@@ -19,6 +19,7 @@ import akka.stream.scaladsl.Keep
 import akka.stream.scaladsl.Sink
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
+import com.typesafe.scalalogging.StrictLogging
 import org.joda.time.DateTime
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
@@ -27,13 +28,13 @@ import scala.concurrent._
 import scala.concurrent.duration._
 
 trait IssueFetching {
-  self: Environment with Transport =>
+  self: Environment with Transport with StrictLogging =>
 
   private lazy val issuesUrl =
     s"https://api.github.com/repos/${config.owner}/${config.repo}/issues"
 
   private lazy val authHeaders =
-    List(Authorization(GenericHttpCredentials("token", config.accessToken)))
+    List(Authorization(GenericHttpCredentials("token", config.credentials.accessToken)))
 
   private lazy val parallelism = 4
 
@@ -52,17 +53,8 @@ trait IssueFetching {
       response.entity
         .toStrict(config.timeout)
         .map { entity =>
-          try {
-            val json = entity.data.decodeString("UTF-8")
-            Json.fromJson[Seq[Issue]](Json.parse(json)).fold(
-              invalid = { errors => sys.error("BADNESS " + errors) },
-              valid = { issues => issues }
-            )
-          } catch {
-            case exn: Throwable =>
-              println("ERRORS " + exn)
-              Nil
-          }
+          val json = Json.parse(entity.data.decodeString("UTF-8"))
+          Json.fromJson[Seq[Issue]](json).getOrElse(sys.error(s"Could not read Github JSON:\n$json"))
         }
 
     case _ =>
