@@ -1,34 +1,17 @@
 package ensime.autoresponder
 
-import akka.actor.ActorSystem
-import akka.actor.Cancellable
+import akka.actor.{ ActorSystem, Cancellable }
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.ContentTypes
-import akka.http.scaladsl.model.HttpHeader
-import akka.http.scaladsl.model.HttpMethods
-import akka.http.scaladsl.model.HttpRequest
-import akka.http.scaladsl.model.HttpResponse
-import akka.http.scaladsl.model.HttpEntity
-import akka.http.scaladsl.model.Uri
-import akka.http.scaladsl.model.headers.Authorization
-import akka.http.scaladsl.model.headers.GenericHttpCredentials
-import akka.stream.ActorMaterializer
+import akka.http.scaladsl.model.{ HttpRequest, HttpResponse }
 import akka.stream.Materializer
 import akka.stream.scaladsl.Flow
-import akka.stream.scaladsl.Keep
-import akka.stream.scaladsl.Sink
-import akka.stream.scaladsl.Source
-import akka.util.ByteString
-import org.joda.time.DateTime
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
-import scala.util.{ Try, Success, Failure }
-import scala.concurrent._
 import scala.concurrent.duration._
+import scala.util.Try
 
 case class Credentials(
   username: String,
-  accessToken: String)
+  accessToken: String
+)
 
 case class Configuration(
   owner: String,
@@ -36,7 +19,8 @@ case class Configuration(
   message: String,
   credentials: Credentials,
   pollInterval: FiniteDuration,
-  timeout: FiniteDuration)
+  timeout: FiniteDuration
+)
 
 object Configuration {
   def load: Configuration = {
@@ -60,7 +44,8 @@ object Configuration {
       message = file("autoresponder.messageFile"),
       credentials = Credentials(
         username = string("autoresponder.credentials.username"),
-        accessToken = string("autoresponder.credentials.accessToken")),
+        accessToken = string("autoresponder.credentials.accessToken")
+      ),
       pollInterval = duration("autoresponder.pollInterval"),
       timeout = duration("autoresponder.timeout")
     )
@@ -73,6 +58,8 @@ trait Environment {
 
 trait Transport {
   val Host = "api.github.com"
+  val DownloadTimeout = 500.millis
+  val DownloadParallelism = 20
 
   def pool[T](implicit mat: Materializer, as: ActorSystem): Flow[(HttpRequest, T), (Try[HttpResponse], T), Unit] = Http().superPool[T]()
 }
