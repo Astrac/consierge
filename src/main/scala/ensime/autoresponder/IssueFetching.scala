@@ -21,6 +21,8 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.typesafe.scalalogging.StrictLogging
 import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
+import org.joda.time.format.DateTimeFormat
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import scala.util.{ Try, Success, Failure }
@@ -30,20 +32,24 @@ import scala.concurrent.duration._
 trait IssueFetching {
   self: Environment with Transport with StrictLogging =>
 
-  private lazy val issuesUrl =
-    s"https://api.github.com/repos/${config.owner}/${config.repo}/issues"
+  private val dateTimeFormat = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z")
 
-  private lazy val authHeaders =
+  private val authHeaders =
     List(Authorization(GenericHttpCredentials("token", config.credentials.accessToken)))
 
-  private lazy val parallelism = 4
+  private val parallelism = 4
+
+  private def issuesUrl(since: DateTime = DateTime.now) = {
+    val sinceString = since.withZone(DateTimeZone.UTC).toString(dateTimeFormat)
+    s"https://api.github.com/repos/${config.owner}/${config.repo}/issues?since=$sinceString"
+  }
 
   def tickSource: Source[Unit, Cancellable] =
     Source(1.second, config.pollInterval, ())
 
   def issueSource(implicit mat: Materializer, as: ActorSystem, ec: ExecutionContext): Source[Issue, Cancellable] =
     tickSource
-      .map(unit => HttpRequest(uri = issuesUrl, headers = authHeaders) -> unit)
+      .map(unit => HttpRequest(uri = issuesUrl(), headers = authHeaders) -> unit)
       .via(pool[Unit])
       .mapAsync(parallelism)(parseIssuesResponse)
       .mapConcat(_.to[collection.immutable.Iterable])
