@@ -10,8 +10,7 @@ import scala.util.Try
 
 case class Credentials(
   username: String,
-  accessToken: String
-)
+  accessToken: String)
 
 case class Configuration(
   owner: String,
@@ -19,8 +18,7 @@ case class Configuration(
   message: String,
   credentials: Credentials,
   pollInterval: FiniteDuration,
-  timeout: FiniteDuration
-)
+  timeout: FiniteDuration)
 
 object Configuration {
   def load: Configuration = {
