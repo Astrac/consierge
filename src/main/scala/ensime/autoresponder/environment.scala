@@ -30,7 +30,7 @@ object Configuration {
 
     def duration(key: String): FiniteDuration =
       Option(config.getDuration(key))
-        .map(_.getNano.nanoseconds)
+        .map(_.toMillis.milliseconds)
         .getOrElse(sys.error(s"Config key not found: $key"))
 
     def file(key: String): String =

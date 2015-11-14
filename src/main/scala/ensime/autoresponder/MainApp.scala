@@ -1,14 +1,13 @@
 package ensime.autoresponder
 
 import akka.actor.ActorSystem
-import akka.stream.ActorAttributes.SupervisionStrategy
-import akka.stream.ActorMaterializer
+import akka.stream.{ ActorMaterializer, ActorMaterializerSettings }
 import akka.stream.Supervision
 import com.typesafe.scalalogging.StrictLogging
 
 object MainApp extends App with StrictLogging {
 
-  val supervisor = SupervisionStrategy {
+  val supervisor: (Throwable => Supervision.Directive) = {
     case ex: Throwable =>
       logger.error(s"Unhandled error: ${ex.getMessage}", ex)
       ex.printStackTrace
@@ -16,17 +15,22 @@ object MainApp extends App with StrictLogging {
   }
 
   implicit val actorSystem = ActorSystem("ensime-responder")
-  implicit val materializer = ActorMaterializer()
+  implicit val materializer = ActorMaterializer(
+    ActorMaterializerSettings(actorSystem) withSupervisionStrategy supervisor)
   implicit val executionContext = actorSystem.dispatcher
 
   val flows = new Flows {
     val config = Configuration.load
   }
 
+  logger.debug(s"Configuration: ${flows.config}")
+
   val (cancellable, process) = flows.graph.run
 
   process.onComplete { c =>
-    s"Process completed with status: $c"
+    logger.info(s"Process completed with status: $c")
     actorSystem.shutdown()
   }
+
+  actorSystem.awaitTermination()
 }

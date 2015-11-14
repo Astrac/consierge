@@ -41,7 +41,9 @@ trait IssueFetching {
 
   private def issuesUrl(since: DateTime = DateTime.now) = {
     val sinceString = since.withZone(DateTimeZone.UTC).toString(dateTimeFormat)
-    s"https://api.github.com/repos/${config.owner}/${config.repo}/issues?since=$sinceString"
+    Uri(s"/repos/${config.owner}/${config.repo}/issues") //?since=$sinceString")
+      .withHost(Host)
+      .withScheme(Uri.httpScheme(securedConnection = true))
   }
 
   def tickSource: Source[Unit, Cancellable] =
@@ -49,18 +51,25 @@ trait IssueFetching {
 
   def issueSource(implicit mat: Materializer, as: ActorSystem, ec: ExecutionContext): Source[Issue, Cancellable] =
     tickSource
-      .map(unit => HttpRequest(uri = issuesUrl(), headers = authHeaders) -> unit)
+      .map { unit =>
+        val url = issuesUrl()
+        logger.debug("About to fetch issues: " + url)
+        HttpRequest(uri = url, headers = authHeaders) -> unit
+      }
       .via(pool[Unit])
       .mapAsync(parallelism)(parseIssuesResponse)
       .mapConcat(_.to[collection.immutable.Iterable])
+      .map { issue =>
+        logger.debug(s"Found issue: $issue")
+        issue
+      }
 
   def parseIssuesResponse(input: (Try[HttpResponse], Unit))(implicit mat: Materializer, ec: ExecutionContext): Future[Seq[Issue]] = input match {
     case (Success(response), _) =>
       response.entity
         .toStrict(config.timeout)
         .map { entity =>
-          val json = Json.parse(entity.data.decodeString("UTF-8"))
-          Json.fromJson[Seq[Issue]](json).getOrElse(sys.error(s"Could not read Github JSON:\n$json"))
+          Json.parse(entity.data.decodeString("UTF-8")).as[Seq[Issue]]
         }
 
     case _ =>
