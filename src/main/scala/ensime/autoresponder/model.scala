@@ -13,7 +13,6 @@ import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
-import scala.concurrent.duration._
 import scala.util.Try
 
 sealed trait IssueState
@@ -30,11 +29,12 @@ object IssueState {
   }
 }
 
-case class User(id: Int)
+case class User(id: Int, login: String)
 
 object User {
   implicit val reads: Reads[User] =
-    (__ \ "id").read[Int].map(User.apply)
+    ((__ \ "id").read[Int] and
+      (__ \ "login").read[String])(User.apply _)
 }
 
 case class Issue(id: Int, number: Int, user: User, title: String, body: String, state: IssueState, createdAt: DateTime, updatedAt: DateTime)
@@ -50,6 +50,15 @@ object Issue {
     (__ \ "created_at").read[String].map(DateTime.parse) ~
     (__ \ "updated_at").read[String].map(DateTime.parse)
   )(Issue.apply _)
+}
+
+case class IssueComment(id: Int, user: User)
+
+object IssueComment {
+  implicit val reads: Reads[IssueComment] = (
+    (__ \ "id").read[Int] ~
+    (__ \ "user").read[User]
+  )(IssueComment.apply _)
 }
 
 case class CommentResponse(id: Int, url: String, createdAt: DateTime)
