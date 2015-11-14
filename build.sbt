@@ -14,6 +14,7 @@ lazy val root = (project in file("."))
       "com.typesafe.akka" %% "akka-stream-experimental" % akkaStreamsV,
       "com.typesafe.akka" %% "akka-http-core-experimental" % akkaStreamsV,
       "com.typesafe.akka" %% "akka-http-experimental" % akkaStreamsV,
+      "com.typesafe.play" %% "play-json" % "2.4.3",
       "com.typesafe.scala-logging" %% "scala-logging"   % "3.1.0",
       "ch.qos.logback" % "logback-classic" % "1.1.2",
       "joda-time" % "joda-time" % "2.9.1"
