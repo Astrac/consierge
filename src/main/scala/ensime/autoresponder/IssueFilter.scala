@@ -50,14 +50,14 @@ trait IssueFilter extends Transport with Environment {
 
   def contributorFilter(implicit mat: Materializer, as: ActorSystem, ec: ExecutionContext) = Flow[Issue]
     .map(i => (contributorsRequest(i), i))
-    .via(pool[Issue])
+    .via(pool)
     .mapAsync(DownloadParallelism)((contributorsResponse _).tupled)
     .filter(_._2)
     .map(_._1)
 
   def commentedFilter(implicit mat: Materializer, as: ActorSystem, ec: ExecutionContext) = Flow[Issue]
     .map(i => (commentsRequest(i), i))
-    .via(pool[Issue])
+    .via(pool)
     .mapAsync(DownloadParallelism)((commentsResponse _).tupled)
     .filter(_._2)
     .map(_._1)

@@ -34,7 +34,7 @@ trait IssueFetching {
 
   private val dateTimeFormat = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z")
 
-  private val authHeaders =
+  private lazy val authHeaders =
     List(Authorization(GenericHttpCredentials("token", config.credentials.accessToken)))
 
   private val parallelism = 4
