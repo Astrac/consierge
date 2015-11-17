@@ -2,15 +2,20 @@ package ensime.autoresponder
 
 import akka.actor.{ ActorSystem, Cancellable }
 import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.HttpHeader
+import akka.http.scaladsl.model.headers.Authorization
+import akka.http.scaladsl.model.headers.GenericHttpCredentials
 import akka.http.scaladsl.model.{ HttpRequest, HttpResponse }
 import akka.stream.Materializer
 import akka.stream.scaladsl.Flow
+import com.typesafe.scalalogging.StrictLogging
 import scala.concurrent.duration._
 import scala.util.Try
 
 case class Credentials(
   username: String,
-  accessToken: String)
+  accessToken: String
+)
 
 case class Configuration(
   owner: String,
@@ -18,7 +23,8 @@ case class Configuration(
   message: String,
   credentials: Credentials,
   pollInterval: FiniteDuration,
-  timeout: FiniteDuration)
+  timeout: FiniteDuration
+)
 
 object Configuration {
   def load: Configuration = {
@@ -54,10 +60,22 @@ trait Environment {
   def config: Configuration
 }
 
-trait Transport {
+trait Transport extends StrictLogging {
+  this: Environment =>
+
   val Host = "api.github.com"
   val DownloadTimeout = 500.millis
   val DownloadParallelism = 20
 
-  def pool[T](implicit mat: Materializer, as: ActorSystem): Flow[(HttpRequest, T), (Try[HttpResponse], T), Unit] = Http().superPool[T]()
+  private lazy val authHeaders: Iterable[HttpHeader] =
+    List(Authorization(GenericHttpCredentials("token", config.credentials.accessToken)))
+
+  def pool[T](implicit mat: Materializer, as: ActorSystem): Flow[(HttpRequest, T), (Try[HttpResponse], T), Unit] =
+    Flow[(HttpRequest, T)]
+      .map { req =>
+        val authReq = (req._1.withHeaders(req._1.headers ++ authHeaders), req._2)
+        logger.debug(s"Sending request: $authReq")
+        authReq
+      }
+      .via(Http().superPool[T]())
 }
