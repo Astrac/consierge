@@ -34,9 +34,6 @@ trait IssueFetching {
 
   private val dateTimeFormat = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss'Z")
 
-  private lazy val authHeaders =
-    List(Authorization(GenericHttpCredentials("token", config.credentials.accessToken)))
-
   private val parallelism = 4
 
   private def issuesUrl(since: DateTime = DateTime.now) = {
@@ -54,7 +51,7 @@ trait IssueFetching {
       .map { unit =>
         val url = issuesUrl()
         logger.debug("About to fetch issues: " + url)
-        HttpRequest(uri = url, headers = authHeaders) -> unit
+        HttpRequest(uri = url) -> unit
       }
       .via(pool[Unit])
       .mapAsync(parallelism)(parseIssuesResponse)

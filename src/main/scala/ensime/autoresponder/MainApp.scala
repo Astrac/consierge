@@ -16,7 +16,8 @@ object MainApp extends App with StrictLogging {
 
   implicit val actorSystem = ActorSystem("ensime-responder")
   implicit val materializer = ActorMaterializer(
-    ActorMaterializerSettings(actorSystem) withSupervisionStrategy supervisor)
+    ActorMaterializerSettings(actorSystem) withSupervisionStrategy supervisor
+  )
   implicit val executionContext = actorSystem.dispatcher
 
   val flows = new Flows {
