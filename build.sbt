@@ -6,7 +6,7 @@ lazy val akkaStreamsV = "1.0"
 lazy val root = (project in file("."))
   .settings(
     scalaVersion  := "2.11.7",
-    name := "github-autoresponder",
+    name := "consierge",
     organization  := "ensime",
     libraryDependencies ++= Seq(
       "com.typesafe.akka" %% "akka-actor" % akkaV,

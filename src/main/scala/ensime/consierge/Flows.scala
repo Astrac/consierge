@@ -1,4 +1,4 @@
-package ensime.autoresponder
+package ensime.consierge
 
 import akka.actor.{ ActorSystem, Cancellable }
 import akka.stream.Materializer

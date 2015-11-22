@@ -1,4 +1,4 @@
-package ensime.autoresponder
+package ensime.consierge
 
 import akka.actor.ActorSystem
 import akka.stream.{ ActorMaterializer, ActorMaterializerSettings }

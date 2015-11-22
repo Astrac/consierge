@@ -1,4 +1,4 @@
-package ensime.autoresponder
+package ensime.consierge
 
 import akka.actor.{ ActorSystem, Cancellable }
 import akka.http.scaladsl.Http
@@ -43,15 +43,15 @@ object Configuration {
       scala.io.Source.fromFile(string(key)).mkString
 
     Configuration(
-      owner = string("autoresponder.owner"),
-      repo = string("autoresponder.repo"),
-      message = file("autoresponder.messageFile"),
+      owner = string("consierge.owner"),
+      repo = string("consierge.repo"),
+      message = file("consierge.messageFile"),
       credentials = Credentials(
-        username = string("autoresponder.credentials.username"),
-        accessToken = string("autoresponder.credentials.accessToken")
+        username = string("consierge.credentials.username"),
+        accessToken = string("consierge.credentials.accessToken")
       ),
-      pollInterval = duration("autoresponder.pollInterval"),
-      timeout = duration("autoresponder.timeout")
+      pollInterval = duration("consierge.pollInterval"),
+      timeout = duration("consierge.timeout")
     )
   }
 }

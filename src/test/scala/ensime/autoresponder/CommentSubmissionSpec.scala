@@ -1,18 +1,18 @@
-package ensime.autoresponder
+package ensime.consierge
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpRequest, HttpResponse, StatusCodes}
-import akka.stream.{ActorMaterializer, Materializer}
-import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
+import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, HttpRequest, HttpResponse, StatusCodes }
+import akka.stream.{ ActorMaterializer, Materializer }
+import akka.stream.scaladsl.{ Flow, Keep, Sink, Source }
 import akka.util.ByteString
 import org.joda.time.DateTime
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.{ FlatSpec, Matchers }
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.time.{Millis, Seconds, Span}
-import scala.util.{Success, Try}
+import org.scalatest.time.{ Millis, Seconds, Span }
+import scala.util.{ Success, Try }
 
 class CommententSubmissionSpec extends FlatSpec with Matchers with ScalaFutures {
-  implicit val actorSystem = ActorSystem("autoresponder-test")
+  implicit val actorSystem = ActorSystem("consierge-test")
   implicit val materializer = ActorMaterializer()
   implicit val executionContext = actorSystem.dispatcher
   implicit override val patienceConfig = PatienceConfig(Span(1, Seconds), Span(100, Millis))
