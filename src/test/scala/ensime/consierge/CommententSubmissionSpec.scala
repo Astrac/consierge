@@ -1,15 +1,18 @@
 package ensime.consierge
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, HttpRequest, HttpResponse, StatusCodes }
-import akka.stream.{ ActorMaterializer, Materializer }
-import akka.stream.scaladsl.{ Flow, Keep, Sink, Source }
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpRequest, HttpResponse, StatusCodes}
+import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
+import akka.stream.{ActorMaterializer, Materializer}
 import akka.util.ByteString
 import org.joda.time.DateTime
-import org.scalatest.{ FlatSpec, Matchers }
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.time.{ Millis, Seconds, Span }
-import scala.util.{ Success, Try }
+import org.scalatest.time.{Millis, Seconds, Span}
+import org.scalatest.{FlatSpec, Matchers}
+
+import scala.util.{Success, Try}
+import scala.concurrent.duration._
+
 
 class CommententSubmissionSpec extends FlatSpec with Matchers with ScalaFutures {
   implicit val actorSystem = ActorSystem("consierge-test")
@@ -17,7 +20,7 @@ class CommententSubmissionSpec extends FlatSpec with Matchers with ScalaFutures 
   implicit val executionContext = actorSystem.dispatcher
   implicit override val patienceConfig = PatienceConfig(Span(1, Seconds), Span(100, Millis))
 
-  val configuration = Configuration("foo", "bar", "A message")
+  val configuration = Configuration("foo", "bar", "A message", Credentials("", ""), 1.seconds, 100.milliseconds)
 
   val mockResponseBody = """
 {
@@ -66,7 +69,7 @@ class CommententSubmissionSpec extends FlatSpec with Matchers with ScalaFutures 
   }
 
   "The submission flow" should "transform an issue in a comment submission" in {
-    val user = User(2)
+    val user = User(2, "any")
 
     val issue = Issue(
       1,
