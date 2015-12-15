@@ -60,7 +60,7 @@ trait IssueFilter extends Transport with Environment with StrictLogging {
         logger.debug(s"Am I a contributor for issue ${issue.id}? $shouldComment")
         (issue, shouldComment)
     }
-    // .filter(_._2)
+    .filter(_._2)
     .map(_._1)
 
   def commentedFilter(implicit mat: Materializer, as: ActorSystem, ec: ExecutionContext) = Flow[Issue]
