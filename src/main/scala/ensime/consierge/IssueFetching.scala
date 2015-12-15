@@ -1,33 +1,17 @@
 package ensime.consierge
 
-import akka.actor.ActorSystem
-import akka.actor.Cancellable
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.ContentTypes
-import akka.http.scaladsl.model.HttpHeader
-import akka.http.scaladsl.model.HttpMethods
-import akka.http.scaladsl.model.HttpRequest
-import akka.http.scaladsl.model.HttpResponse
-import akka.http.scaladsl.model.HttpEntity
-import akka.http.scaladsl.model.Uri
-import akka.http.scaladsl.model.headers.Authorization
-import akka.http.scaladsl.model.headers.GenericHttpCredentials
-import akka.stream.ActorMaterializer
+import akka.actor.{ActorSystem, Cancellable}
+import akka.http.scaladsl.model.{HttpRequest, HttpResponse, Uri}
 import akka.stream.Materializer
-import akka.stream.scaladsl.Flow
-import akka.stream.scaladsl.Keep
-import akka.stream.scaladsl.Sink
 import akka.stream.scaladsl.Source
-import akka.util.ByteString
 import com.typesafe.scalalogging.StrictLogging
-import org.joda.time.DateTime
-import org.joda.time.DateTimeZone
+import org.joda.time.{DateTime, DateTimeZone}
 import org.joda.time.format.DateTimeFormat
 import play.api.libs.json._
-import play.api.libs.functional.syntax._
-import scala.util.{ Try, Success, Failure }
+
 import scala.concurrent._
 import scala.concurrent.duration._
+import scala.util.{Success, Try}
 
 trait IssueFetching {
   self: Environment with Transport with StrictLogging =>
@@ -66,7 +50,14 @@ trait IssueFetching {
       response.entity
         .toStrict(config.timeout)
         .map { entity =>
-          Json.parse(entity.data.decodeString("UTF-8")).as[Seq[Issue]]
+          val dt = entity.data.decodeString("UTF-8")
+          try {
+            Json.parse(dt).as[Seq[Issue]]
+          } catch {
+            case e: Exception =>
+              logger.error(s"Unable to parse server results: $dt")
+              throw e
+          }
         }
 
     case _ =>
