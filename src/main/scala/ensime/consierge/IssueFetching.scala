@@ -1,17 +1,17 @@
 package ensime.consierge
 
-import akka.actor.{ActorSystem, Cancellable}
-import akka.http.scaladsl.model.{HttpRequest, HttpResponse, Uri}
+import akka.actor.{ ActorSystem, Cancellable }
+import akka.http.scaladsl.model.{ HttpRequest, HttpResponse, Uri }
 import akka.stream.Materializer
 import akka.stream.scaladsl.Source
 import com.typesafe.scalalogging.StrictLogging
-import org.joda.time.{DateTime, DateTimeZone}
+import org.joda.time.{ DateTime, DateTimeZone }
 import org.joda.time.format.DateTimeFormat
 import play.api.libs.json._
 
 import scala.concurrent._
 import scala.concurrent.duration._
-import scala.util.{Success, Try}
+import scala.util.{ Success, Try }
 
 trait IssueFetching {
   self: Environment with Transport with StrictLogging =>

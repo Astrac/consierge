@@ -3,6 +3,9 @@ scalariformSettings
 lazy val akkaV = "2.3.14"
 lazy val akkaStreamsV = "1.0"
 
+resolvers += Resolver.jcenterRepo // for ficus config
+
+
 lazy val root = (project in file("."))
   .settings(
     scalaVersion  := "2.11.7",
@@ -17,7 +20,8 @@ lazy val root = (project in file("."))
       "com.typesafe.play" %% "play-json" % "2.4.3",
       "com.typesafe.scala-logging" %% "scala-logging"   % "3.1.0",
       "ch.qos.logback" % "logback-classic" % "1.1.2",
-      "joda-time" % "joda-time" % "2.9.1"
+      "joda-time" % "joda-time" % "2.9.1",
+      "com.iheart" %% "ficus" % "1.1.3"
     ) ++ Seq(
       "org.scalatest" %% "scalatest" % "2.2.4",
       "org.scalamock" %% "scalamock-scalatest-support" % "3.2.2",
