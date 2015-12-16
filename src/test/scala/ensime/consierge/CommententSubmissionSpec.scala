@@ -20,7 +20,7 @@ class CommententSubmissionSpec extends FlatSpec with Matchers with ScalaFutures 
   implicit val executionContext = actorSystem.dispatcher
   implicit override val patienceConfig = PatienceConfig(Span(1, Seconds), Span(100, Millis))
 
-  val configuration = Configuration("foo", "bar", "from.file", Some("A message"), Credentials("", ""), 1.seconds, 100.milliseconds)
+  val configuration = Configuration("foo", "bar", "from.file", Some("A message"), Credentials("", ""), 1.seconds, 100.milliseconds, FetchConfig())
 
   val mockResponseBody = """
 {

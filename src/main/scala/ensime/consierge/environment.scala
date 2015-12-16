@@ -18,6 +18,8 @@ case class Credentials(
   username: String,
   accessToken: String)
 
+case class FetchConfig(contributorFilter: Boolean = true, sinceEnabled: Boolean = true)
+
 case class Configuration(
   owner: String,
   repo: String,
@@ -25,7 +27,8 @@ case class Configuration(
   messageOption: Option[String],
   credentials: Credentials,
   pollInterval: FiniteDuration,
-  timeout: FiniteDuration) {
+  timeout: FiniteDuration,
+  fetchOpts: FetchConfig) {
 
   def message = messageOption.getOrElse(sys.error("Message was not setup!"))
 

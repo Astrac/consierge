@@ -51,6 +51,9 @@ trait IssueFilter extends Transport with Environment with StrictLogging {
     case Failure(ex) => throw ex
   }
 
+  def contributorFilterIfEnabled(implicit mat: Materializer, as: ActorSystem, ec: ExecutionContext)  =
+    if  (config.fetchOpts.contributorFilter) contributorFilter else Flow[Issue].map(i => i)
+
   def contributorFilter(implicit mat: Materializer, as: ActorSystem, ec: ExecutionContext) = Flow[Issue]
     .map(i => (contributorsRequest(i), i))
     .via(pool)
@@ -77,6 +80,6 @@ trait IssueFilter extends Transport with Environment with StrictLogging {
 
   def filterFlow(implicit mat: Materializer, as: ActorSystem, ec: ExecutionContext): Flow[Issue, Issue, Unit] =
     Flow[Issue]
-      .via(contributorFilter)
+      .via(contributorFilterIfEnabled)
       .via(commentedFilter)
 }
