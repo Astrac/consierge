@@ -4,6 +4,9 @@ Project to scan for new issues on a Github repository and auto-reply with a fixe
 
 [![Join the chat at https://gitter.im/Astrac/consierge](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Astrac/consierge?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status](https://travis-ci.org/rumoku/consierge.svg)](https://travis-ci.org/rumoku/consierge)
+[![codecov.io](http://codecov.io/github/rumoku/consierge/coverage.svg?branch=master)](http://codecov.io/github/rumoku/consierge?branch=master)
+
+
 
 
 
