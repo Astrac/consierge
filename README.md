@@ -33,6 +33,10 @@ consierge = {
   messageFile  = "/path/to/message/file.txt"
   pollInterval = "10 seconds"
   timeout      = "500 milliseconds"
+  fetchOpts {
+    contributorFilter = true # ignore tickets created by contributor
+    sinceEnabled = true # fetch filter updated since previous execution
+  }  
 }
 ~~~
 
