@@ -7,12 +7,13 @@ class ConfigFetcherTest extends FlatSpec with Matchers {
 
   "config" should "load all data from test file" in {
     val config = Configuration.load
-    assert(config.owner === "user_name")
-    assert(config.repo === "repo_name")
-    assert(config.credentials.username === "login_name")
-    assert(config.pollInterval === 10.seconds)
+    config.owner should equal ("user_name")
+    config.owner  should equal ("user_name")
+    config.repo  should equal ("repo_name")
+    config.credentials.username should equal ("login_name")
+    config.pollInterval should equal (10.seconds)
 
-    assert(config.message.nonEmpty === true)
+    config.message.nonEmpty should be (true)
   }
 
 }
