@@ -1,0 +1,10 @@
+language: scala
+scala:
+     - 2.11.7
+jdk:
+  - oraclejdk8
+script: "sbt clean coverage test"
+before_install:
+  - pip install --user codecov
+after_success:
+  - codecov

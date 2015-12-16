@@ -11,48 +11,39 @@ import akka.stream.scaladsl.Flow
 import com.typesafe.scalalogging.StrictLogging
 import scala.concurrent.duration._
 import scala.util.Try
+import net.ceedubs.ficus.Ficus._
+import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 
 case class Credentials(
   username: String,
-  accessToken: String
-)
+  accessToken: String)
+
+case class FetchConfig(contributorFilter: Boolean = true, sinceEnabled: Boolean = true)
 
 case class Configuration(
   owner: String,
   repo: String,
-  message: String,
+  messageFile: String,
+  messageOption: Option[String],
   credentials: Credentials,
   pollInterval: FiniteDuration,
-  timeout: FiniteDuration
-)
+  timeout: FiniteDuration,
+  fetchOpts: FetchConfig) {
+
+  def message = messageOption.getOrElse(sys.error("Message was not setup!"))
+
+}
 
 object Configuration {
   def load: Configuration = {
     val config = com.typesafe.config.ConfigFactory.load()
 
-    def string(key: String): String =
-      Option(config.getString(key))
-        .getOrElse(sys.error(s"Config key not found: $key"))
-
-    def duration(key: String): FiniteDuration =
-      Option(config.getDuration(key))
-        .map(_.toMillis.milliseconds)
-        .getOrElse(sys.error(s"Config key not found: $key"))
+    val cfg = config.as[Configuration]("consierge")
 
     def file(key: String): String =
-      scala.io.Source.fromFile(string(key)).mkString
+      scala.io.Source.fromFile(key).mkString
 
-    Configuration(
-      owner = string("consierge.owner"),
-      repo = string("consierge.repo"),
-      message = file("consierge.messageFile"),
-      credentials = Credentials(
-        username = string("consierge.credentials.username"),
-        accessToken = string("consierge.credentials.accessToken")
-      ),
-      pollInterval = duration("consierge.pollInterval"),
-      timeout = duration("consierge.timeout")
-    )
+    cfg.copy(messageOption = Option(file(cfg.messageFile)))
   }
 }
 

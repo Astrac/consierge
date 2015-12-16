@@ -5,10 +5,11 @@ import akka.http.scaladsl.model.{HttpRequest, HttpResponse, Uri}
 import akka.stream.Materializer
 import akka.stream.scaladsl.Source
 import com.typesafe.scalalogging.StrictLogging
-import org.joda.time.{DateTime, DateTimeZone}
 import org.joda.time.format.DateTimeFormat
+import org.joda.time.{DateTime, DateTimeZone}
 import play.api.libs.json._
 
+import scala.collection.concurrent.TrieMap
 import scala.concurrent._
 import scala.concurrent.duration._
 import scala.util.{Success, Try}
@@ -20,9 +21,18 @@ trait IssueFetching {
 
   private val parallelism = 4
 
-  private def issuesUrl(since: DateTime = DateTime.now) = {
-    val sinceString = since.withZone(DateTimeZone.UTC).toString(dateTimeFormat)
-    Uri(s"/repos/${config.owner}/${config.repo}/issues") //?since=$sinceString")
+  val lastExecMap = TrieMap[(String, String), DateTime]()
+
+  private def issuesUrl() = {
+    val params = if (config.fetchOpts.sinceEnabled) {
+      val key = (config.owner, config.repo)
+      val prevLastExec = lastExecMap.put(key, DateTime.now())
+      prevLastExec.map { since =>
+        since.withZone(DateTimeZone.UTC).toString(dateTimeFormat)
+      }.map(s => s"?since=$s").getOrElse("")
+    } else ""
+
+    Uri(s"/repos/${config.owner}/${config.repo}/issues$params")
       .withHost(Host)
       .withScheme(Uri.httpScheme(securedConnection = true))
   }
