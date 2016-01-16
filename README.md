@@ -1,6 +1,6 @@
 # Consierge
 
-Project to scan for new issues on a Github repository and auto-reply with a fixed message.
+Project to scan for issues added by someone new on a Github repository and auto-reply with a fixed message.
 
 [![Join the chat at https://gitter.im/Astrac/consierge](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/Astrac/consierge?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
