@@ -1,20 +1,19 @@
 package ensime.consierge
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpRequest, HttpResponse, StatusCodes}
-import akka.stream.scaladsl.{Flow, Keep, Sink, Source}
-import akka.stream.{ActorMaterializer, Materializer}
+import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, HttpRequest, HttpResponse, StatusCodes }
+import akka.stream.scaladsl.{ Flow, Keep, Sink, Source }
+import akka.stream.{ ActorMaterializer, Materializer }
 import akka.util.ByteString
 import org.joda.time.DateTime
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.time.{Millis, Seconds, Span}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.time.{ Millis, Seconds, Span }
+import org.scalatest.{ FlatSpec, Matchers }
 
-import scala.util.{Success, Try}
+import scala.util.{ Success, Try }
 import scala.concurrent.duration._
 
-
-class CommententSubmissionSpec extends FlatSpec with Matchers with ScalaFutures {
+class CommentSubmissionSpec extends FlatSpec with Matchers with ScalaFutures {
   implicit val actorSystem = ActorSystem("consierge-test")
   implicit val materializer = ActorMaterializer()
   implicit val executionContext = actorSystem.dispatcher
@@ -87,6 +86,10 @@ class CommententSubmissionSpec extends FlatSpec with Matchers with ScalaFutures 
       .via(submission(Success(mockResponse)).respondFlow)
       .toMat(Sink.head)(Keep.right)
       .run
+
+    whenReady(resp) { lst =>
+      println(lst)
+    }
 
     whenReady(resp) { lst =>
       lst should equal(
